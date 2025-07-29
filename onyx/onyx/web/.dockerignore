@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.log
+*.db
+*.sqlite3
+.env
+.DS_Store
+node_modules/
+.next/
+celerybeat-schedule

@@ -1,0 +1,28 @@
+# Ignore virtual environments
+.venv/
+venv/
+
+# Ignore Mac system junk
+__MACOSX/
+.DS_Store
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore system files
+*.lnk
+*.ini
+*.dat
+*.blf
+*.regtrans-ms
+
+# Ignore user folders
+AppData/
+Documents/
+Downloads/
+Pictures/
+Music/
+Videos/
+OneDrive/

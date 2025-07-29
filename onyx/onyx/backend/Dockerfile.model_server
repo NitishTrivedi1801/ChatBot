@@ -1,0 +1,53 @@
+#FROM onyxdotapp/onyx-ml-base:latest
+FROM onyx-ml-base:latest
+
+RUN apt-get update && apt-get install -y --no-install-recommends bash curl ca-certificates && rm -rf /var/lib/apt/lists/*
+
+ARG ONYX_VERSION=0.0.0-dev
+ENV ONYX_VERSION=${ONYX_VERSION} \
+    DANSWER_RUNNING_IN_DOCKER=true \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app
+
+RUN echo "ONYX_VERSION: ${ONYX_VERSION}"
+
+# ✅ Working directory
+WORKDIR /app
+
+# ✅ Copy Onyx source files
+COPY backend/shared_configs /app/shared_configs
+COPY backend/model_server /app/model_server
+COPY backend/scripts/start_model_server.sh /app/start_model_server.sh
+
+# ✅ Copy minimal required utils to run
+COPY backend/onyx/__init__.py /app/onyx/__init__.py
+COPY backend/onyx/utils/logger.py /app/onyx/utils/logger.py
+COPY backend/onyx/utils/middleware.py /app/onyx/utils/middleware.py
+
+# ✅ Make script executable
+RUN chmod +x /app/start_model_server.sh
+
+# ✅ Set default port via ENV (can be overridden per container)
+ENV MODEL_SERVER_PORT=8001
+
+# ✅ Entrypoint: Use unified startup script
+CMD ["bash", "/app/start_model_server.sh"]
+
+# Dockerfile.model_server (base version)
+HEALTHCHECK CMD curl -s -X POST http://localhost:8001/encoder/bi-encoder-embed \
+  -H "Content-Type: application/json" \
+  -d '{"texts": ["healthcheck"], "max_context_length": 512, "normalize_embeddings": false, "text_type": "query", "model_name": "nomic-ai/nomic-embed-text-v1"}' || exit 1
+
+#   HEALTHCHECK CMD curl -s -X POST http://localhost:${PORT:-8001}/encoder/bi-encoder-embed \
+#   -H "Content-Type: application/json" \
+#   -d '{"texts": ["healthcheck"], "max_context_length": 512, "normalize_embeddings": false, "text_type": "query", "model_name": "nomic-ai/nomic-embed-text-v1"}' || exit 1
+
+# ✅ Healthcheck (for inference model on default port 8001)
+# HEALTHCHECK CMD curl -s -X POST http://localhost:8001/encoder/bi-encoder-embed \
+#   -H "Content-Type: application/json" \
+#   -d '{"texts": ["healthcheck"], "max_context_length": 512, "normalize_embeddings": false, "text_type": "query", "model_name": "nomic-ai/nomic-embed-text-v1"}' || exit 1
+
+# ✅ Optional: Preload lightweight model to warm cache (in image)
+RUN python -c "from setfit import SetFitModel; SetFitModel.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')" \
+  && rm -rf /root/.cache/huggingface/hub

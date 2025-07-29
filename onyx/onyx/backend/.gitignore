@@ -1,0 +1,56 @@
+# OS and Editor files
+.DS_Store
+.vscode/
+*.swp
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.db
+*.sqlite3
+
+# Node
+node_modules/
+.next/
+dist/
+
+# Docker-related
+*.tar
+*.pid
+*.sock
+celerybeat-schedule
+.env
+secrets.yaml
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+.cache
+
+# Misc
+*.bak
+*.tmp
+*.old
+
+# Python + Docker
+__pycache__/
+*.pyc
+*.pyo
+*.log
+*.db
+*.sqlite3
+.env
+secrets.yaml
+celerybeat-schedule
+
+# Build and artifacts
+dist/
+build/
+*.egg-info/
+htmlcov/
+.coverage
+.cache
